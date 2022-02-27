@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CommentRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 class Comment
@@ -17,6 +18,7 @@ class Comment
 
     #[ORM\Column(type: 'text')]
     #[Groups(['public'])]
+    #[Assert\NotBlank(['message' => 'Content cannot be empty !'])]
     private $content;
 
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'comments')]
