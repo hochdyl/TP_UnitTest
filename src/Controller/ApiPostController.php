@@ -48,7 +48,7 @@ class ApiPostController extends AbstractController
         } catch (NotEncodableValueException $e) {
             return $this->json([
                 'message' => $e->getMessage()
-            ]);
+            ], 400);
         }
     }
 }
