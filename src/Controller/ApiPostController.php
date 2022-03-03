@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Post;
 use App\Repository\PostRepository;
+use App\Service\EntityUpdater;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,22 +17,22 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ApiPostController extends AbstractController
 {
     /**
-     * Get all posts
+     * Get post
      */
-    #[Route('/api/posts', name: 'api_get_posts', methods: ['GET'])]
-    public function getPosts(PostRepository $postRepository): JsonResponse
+    #[Route('/api/posts/{id}', name: 'api_get_post', defaults: ['id' => false], methods: ['GET'])]
+    public function getPost(false|int $id, PostRepository $postRepository): JsonResponse
     {
-        $posts = $postRepository->findAll();
+        $posts = $id ? $postRepository->find($id) : $postRepository->findAll();
 
         return $this->json($posts, 200, [], ['groups' => 'public']);
     }
 
     /**
-     * Add a new post
+     * Add post
      */
     #[Route('/api/posts', name: 'api_add_post', methods: ['POST'])]
     public function addPost(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
-                        ValidatorInterface $validator): JsonResponse
+                            ValidatorInterface $validator): JsonResponse
     {
         try {
             $post = $serializer->deserialize($request->getContent(), Post::class, 'json');
@@ -54,83 +54,54 @@ class ApiPostController extends AbstractController
     }
 
     /**
-     * TODO : Update all posts
+     * Update post
      */
-    #[Route('/api/posts', name: 'api_update_posts', methods: ['PUT'])]
-    public function updatePosts(PostRepository $postRepository): JsonResponse
+    #[Route('/api/posts/{id}', name: 'api_update_post', defaults: ['id' => false], methods: ['PUT'])]
+    public function updatePost(false|int $id, Request $request, PostRepository $postRepository,
+                               EntityManagerInterface $em, EntityUpdater $updater,
+                               ValidatorInterface $validator): JsonResponse
     {
-        return false;
+        try {
+            $posts = $id ? $postRepository->findBy(['id' => $id]) : $postRepository->findAll();
+            $posts = $updater->update($posts, json_decode($request->getContent(), true));
+            $errors = $validator->validate($posts);
+
+            if(count($errors)) {
+                return $this->json($errors, 400);
+            }
+
+            foreach($posts as $post) {
+                $em->persist($post);
+            }
+            $em->flush();
+
+            return $this->json($posts, 200, [], ['groups' => 'public']);
+        } catch (NotEncodableValueException $e) {
+            return $this->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 
     /**
-     * Delete all posts
+     * Delete post
      */
-    #[Route('/api/posts', name: 'api_delete_posts', methods: ['DELETE'])]
-    public function deletePosts(PostRepository $postRepository, EntityManagerInterface $em): JsonResponse
+    #[Route('/api/posts/{id}', name: 'api_delete_post', defaults: ['id' => false], methods: ['DELETE'])]
+    public function deletePost(false|int $id, PostRepository $postRepository, EntityManagerInterface $em): JsonResponse
     {
-        $posts = $postRepository->findAll();
+        $posts = $id ? $postRepository->findBy(['id' => $id]) : $postRepository->findAll();
+
+        if(!$posts) {
+            $this->createNotFoundException('Nothing to delete.');
+        }
+
         foreach($posts as $post) {
            $em->remove($post);
         }
         $em->flush();
 
         return $this->json([
-           'message' => 'All posts have been deleted successfully.'
+           'message' => 'Post deleted.'
         ]);
-    }
-
-    /**
-     * Get a post
-     */
-    #[Route('/api/posts/{id}', name: 'api_get_post', methods: ['GET'])]
-    public function getPost($id, PostRepository $postRepository): JsonResponse
-    {
-        try {
-            $post = $postRepository->findOneBy(['id' => $id]);
-
-            if(!$post) {
-                throw new EntityNotFoundException('Post not found.');
-            }
-
-            return $this->json($post, 200, [], ['groups' => 'public']);
-        } catch (EntityNotFoundException $e) {
-            return $this->json([
-                'message' => $e->getMessage()
-            ], 404);
-        }
-    }
-
-    /**
-     * TODO : Update a post
-     */
-    #[Route('/api/posts/{id}', name: 'api_update_post', methods: ['PUT'])]
-    public function updatePost($id, PostRepository $postRepository): JsonResponse
-    {
-        return false;
-    }
-
-    /**
-     * Delete a post
-     */
-    #[Route('/api/posts/{id}', name: 'api_delete_post', methods: ['DELETE'])]
-    public function deletePost($id, PostRepository $postRepository, EntityManagerInterface $em): JsonResponse
-    {
-        try {
-            $post = $postRepository->findOneBy(['id' => $id]);
-
-            if(!$post) {
-                throw new EntityNotFoundException('Post not found.');
-            }
-            $em->remove($post);
-            $em->flush();
-
-            return $this->json([
-                'message' => 'The post has been deleted successfully.'
-            ]);
-        } catch (EntityNotFoundException $e) {
-            return $this->json([
-                'message' => $e->getMessage()
-            ], 404);
-        }
     }
 }
