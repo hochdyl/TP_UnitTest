@@ -15,10 +15,12 @@ export default {
   },
   methods: {
     loadPosts() {
-      http.get();
+      this.axios.get("https://127.0.0.1:8000/api/posts");
     },
   },
-  created() {},
+  created() {
+    this.loadPosts();
+  },
 };
 </script>
 
