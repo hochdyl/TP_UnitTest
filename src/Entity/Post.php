@@ -23,7 +23,7 @@ class Post
     #[Assert\NotBlank(['message' => 'Title cannot be empty !'])]
     private $title;
 
-    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Comment::class)]
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Comment::class, orphanRemoval: true)]
     #[Groups(['public'])]
     private $comments;
 
