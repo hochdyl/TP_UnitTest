@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Post;
 use App\Repository\PostRepository;
 use App\Service\EntityUpdater;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,26 +19,34 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ApiPostController extends AbstractController
 {
     /**
-     * Get post
+     * Method : GET
+     * - api/post           : Get all posts.
+     * - api/post/{post_id} : Get a specific post.
      */
     #[Route('/api/post/{post_id}', name: 'api_get_post', defaults: ['post_id' => false], methods: ['GET'])]
     public function getPost(false|int $post_id, PostRepository $postRepository): JsonResponse
     {
         try {
-            $posts = $post_id ? $postRepository->find($post_id) : $postRepository->findAll();
+            $posts = $post_id ?
+                $postRepository->find($post_id) :
+                $postRepository->findAll();
 
             if(!$posts && $post_id) {
                 throw $this->createNotFoundException('Post not found.');
             }
 
             return $this->json($posts, 200, [], ['groups' => 'public']);
+
         } catch (NotFoundHttpException $e) {
             return $this->json(['message' => $e->getMessage()], 400);
         }
     }
 
     /**
-     * Add post
+     * Method : POST
+     * - api/post : Add a new post.
+     *
+     * Expected JSON : "title"
      */
     #[Route('/api/post', name: 'api_add_post', methods: ['POST'])]
     public function addPost(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
@@ -47,7 +56,7 @@ class ApiPostController extends AbstractController
             $post = $serializer->deserialize($request->getContent(), Post::class, 'json');
             $errors = $validator->validate($post);
 
-            if(count($errors)) {
+            if (count($errors)) {
                 return $this->json($errors, 400);
             }
 
@@ -55,13 +64,17 @@ class ApiPostController extends AbstractController
             $em->flush($post);
 
             return $this->json($post, 201, [], ['groups' => 'public']);
+
         } catch (NotEncodableValueException $e) {
             return $this->json(['message' => $e->getMessage()], 400);
         }
     }
 
     /**
-     * Update post
+     * Method : PUT
+     * - api/post/{post_id} : Update a specific post.
+     *
+     * Expected JSON : (optional) "title"
      */
     #[Route('/api/post/{post_id}', name: 'api_update_post', methods: ['PUT'])]
     public function updatePost(int $post_id, Request $request, PostRepository $postRepository,
@@ -71,18 +84,20 @@ class ApiPostController extends AbstractController
         try {
             $post = $postRepository->find($post_id);
 
-            if(!$post) {
+            if (!$post) {
                 throw $this->createNotFoundException('Post not found.');
             }
-        } catch (NotFoundHttpException $e) {
-            return $this->json(['message' => $e->getMessage()], 400);
-        }
 
-        try {
-            $post = $updater->update($post, json_decode($request->getContent(), true));
+            $data = json_decode($request->getContent(), true);
+
+            if (!$data) {
+                throw new Exception('Request content is empty or wrongly formatted.');
+            }
+
+            $post = $updater->update($post, $data);
             $errors = $validator->validate($post);
 
-            if(count($errors)) {
+            if (count($errors)) {
                 return $this->json($errors, 400);
             }
 
@@ -90,22 +105,27 @@ class ApiPostController extends AbstractController
             $em->flush();
 
             return $this->json($post, 200, [], ['groups' => 'public']);
-        } catch (NotEncodableValueException $e ) {
+
+        } catch (NotFoundHttpException|Exception|NotEncodableValueException $e) {
             return $this->json(['message' => $e->getMessage()], 400);
         }
     }
 
     /**
-     * Delete post
+     * Method : DELETE
+     * - api/post           : Delete all posts.
+     * - api/post/{post_id} : Delete a specific post.
      */
     #[Route('/api/post/{post_id}', name: 'api_delete_post', defaults: ['post_id' => false], methods: ['DELETE'])]
     public function deletePost(false|int $post_id, PostRepository $postRepository,
                                EntityManagerInterface $em): JsonResponse
     {
         try {
-            $posts = $post_id ? $postRepository->findBy(['id' => $post_id]) : $postRepository->findAll();
+            $posts = $post_id ?
+                $postRepository->findBy(['id' => $post_id]) :
+                $postRepository->findAll();
 
-            if(!$posts && $post_id) {
+            if (!$posts && $post_id) {
                 throw $this->createNotFoundException('Post not found.');
             }
 
@@ -115,6 +135,7 @@ class ApiPostController extends AbstractController
             $em->flush();
 
             return $this->json(['message' => 'Post deleted.']);
+
         } catch (NotFoundHttpException $e) {
             return $this->json(['message' => $e->getMessage()], 400);
         }
