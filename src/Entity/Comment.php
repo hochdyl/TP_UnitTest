@@ -22,6 +22,8 @@ class Comment
     private $content;
 
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'comments')]
+    #[Groups(['public'])]
+    #[Assert\NotNull(['message' => 'Comment have to be linked to a post !'])]
     private $post;
 
     public function getId(): ?int
