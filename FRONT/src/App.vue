@@ -5,25 +5,23 @@
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
-import TheWelcome from "./components/TheWelcome.vue";
+import Posts from "./components/Posts.vue";
+import Comments from "./components/Comments.vue";
+import FormComment from "./components/FormComment.vue";
 import NotFound from "./components/NotFound.vue";
 
 const routes = {
-  "": HelloWorld,
-  comments: TheWelcome,
+  "": Posts,
+  comments: Comments,
+  addcomment: FormComment,
 };
 
 export default {
   data() {
-    return {
-      currentPath: window.location.hash,
-    };
+    return {};
   },
   methods: {},
-  created() {
-    console.log(window.location.pathname.split("/"));
-  },
+  created() {},
   computed: {
     currentView() {
       return routes[window.location.pathname.split("/")[1] || ""] || NotFound;
@@ -33,6 +31,13 @@ export default {
     window.addEventListener("hashchange", () => {
       this.currentPath = window.location.pathname;
     });
+    let recaptchaScript = document.createElement("script");
+    recaptchaScript.setAttribute(
+      "src",
+      "https://kit.fontawesome.com/04afb75ea3.js"
+    );
+    recaptchaScript.setAttribute("crossorigin", "anonymous");
+    document.head.appendChild(recaptchaScript);
   },
 };
 </script>

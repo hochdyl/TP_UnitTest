@@ -1,5 +1,13 @@
 <template>
-  <div class="row" style="display: flex; justify-content: space-between">
+  <div
+    class="row"
+    style="
+      display: flex;
+      justify-content: space-between;
+      width: 75%;
+      margin: auto;
+    "
+  >
     <div
       class="card col-3"
       style="width: 18rem"
