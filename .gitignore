@@ -3,6 +3,7 @@
 /.env.local
 /.env.local.php
 /.env.*.local
+/FRONT/node_modules
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/

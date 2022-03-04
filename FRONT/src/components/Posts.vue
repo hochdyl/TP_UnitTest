@@ -35,7 +35,7 @@ export default {
   methods: {
     loadPosts() {
       this.axios
-        .get("https://127.0.0.1:8000/api/posts")
+        .get("https://127.0.0.1:8000/api/post")
         .then((res) => (this.posts = res.data));
     },
   },

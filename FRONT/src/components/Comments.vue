@@ -26,10 +26,10 @@
         <div class="card-body">
           <h5 class="card-title">Commentaire {{ comment.id }}</h5>
           <p class="card-text">{{ comment.content }}</p>
-          <a href="#" @click="editModal(comment)">
+          <a :href="'/addcomment/' + comment.id + '?post_id=' + post_id">
             <i class="fa fa-edit blue"></i>
           </a>
-          <a href="#" @click="deleteModal(comment)">
+          <a href="#" @click="deleteComment(comment.id)">
             <i class="fa-solid fa-trash-can" style="color: red"></i>
           </a>
         </div>
@@ -49,8 +49,15 @@ export default {
   methods: {
     loadPosts() {
       this.axios
-        .get("https://127.0.0.1:8000/api/posts/" + this.post_id)
+        .get("https://127.0.0.1:8000/api/post/" + this.post_id)
         .then((res) => (this.comments = res.data.comments));
+    },
+    deleteComment(comment_id) {
+      this.axios
+        .delete("https://127.0.0.1:8000/api/comment/" + comment_id)
+        .then((res) => {
+          this.loadPosts();
+        });
     },
   },
   created() {
