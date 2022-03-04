@@ -5,11 +5,15 @@
         :href="'/comments/' + post_id"
         class="btn btn-primary"
         style="float: right"
+        id="back"
         >Retour vers le post</a
       >
     </div>
     <div>
-      <form @submit.prevent="editmode ? updateComment() : addComment()">
+      <form
+        id="form"
+        @submit.prevent="editmode ? updateComment() : addComment()"
+      >
         <div class="modal-body">
           <div class="form-group">
             <label>Commentaire</label>
@@ -18,14 +22,25 @@
               type="text"
               name="name"
               class="form-control"
+              id="comment"
             />
           </div>
         </div>
         <div class="modal-footer">
-          <button v-show="editmode" type="submit" class="btn btn-success">
+          <button
+            v-show="editmode"
+            type="submit"
+            class="btn btn-success"
+            id="update"
+          >
             Mettre à jour
           </button>
-          <button v-show="!editmode" type="submit" class="btn btn-success">
+          <button
+            v-show="!editmode"
+            type="submit"
+            class="btn btn-success"
+            id="create"
+          >
             Créer
           </button>
         </div>

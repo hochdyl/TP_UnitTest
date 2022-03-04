@@ -23,15 +23,20 @@
         v-for="comment in comments"
         :key="comment.id"
       >
-        <div class="card-body">
+        <div class="card-body" style="position: relative">
           <h5 class="card-title">Commentaire {{ comment.id }}</h5>
           <p class="card-text">{{ comment.content }}</p>
-          <a :href="'/addcomment/' + comment.id + '?post_id=' + post_id">
-            <i class="fa fa-edit blue"></i>
-          </a>
-          <a href="#" @click="deleteComment(comment.id)">
-            <i class="fa-solid fa-trash-can" style="color: red"></i>
-          </a>
+          <div style="position: absolute; bottom: 5px; right: 5px">
+            <a
+              :href="'/addcomment/' + comment.id + '?post_id=' + post_id"
+              style="margin-right: 15px"
+            >
+              <i class="fa fa-edit blue"></i>
+            </a>
+            <a href="#" @click="deleteComment(comment.id)">
+              <i class="fa-solid fa-trash-can" style="color: red"></i>
+            </a>
+          </div>
         </div>
       </div>
     </div>
