@@ -71,4 +71,9 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  display: block !important;
+}
+
+#app {
+  height: 100%;
 }

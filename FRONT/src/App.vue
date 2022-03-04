@@ -1,39 +1,49 @@
 <template>
-  <body></body>
+  <div>
+    <component :is="currentView" />
+  </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
-import TheWelcome from "./components/TheWelcome.vue";
+import Posts from "./components/Posts.vue";
+import Comments from "./components/Comments.vue";
+import FormComment from "./components/FormComment.vue";
+import NotFound from "./components/NotFound.vue";
+
+const routes = {
+  "": Posts,
+  comments: Comments,
+  addcomment: FormComment,
+};
 
 export default {
-  components: { HelloWorld, TheWelcome },
   data() {
-    return {
-      message: "Hello Vue!",
-    };
+    return {};
   },
-  methods: {
-    loadPosts() {
-      this.axios.get("https://127.0.0.1:8000/api/posts");
+  methods: {},
+  created() {},
+  computed: {
+    currentView() {
+      return routes[window.location.pathname.split("/")[1] || ""] || NotFound;
     },
   },
-  created() {
-    this.loadPosts();
+  mounted() {
+    window.addEventListener("hashchange", () => {
+      this.currentPath = window.location.pathname;
+    });
+    let recaptchaScript = document.createElement("script");
+    recaptchaScript.setAttribute(
+      "src",
+      "https://kit.fontawesome.com/04afb75ea3.js"
+    );
+    recaptchaScript.setAttribute("crossorigin", "anonymous");
+    document.head.appendChild(recaptchaScript);
   },
 };
 </script>
 
 <style>
 @import "./assets/base.css";
-
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-
-  font-weight: normal;
-}
 
 header {
   line-height: 1.5;
@@ -49,40 +59,5 @@ a,
   text-decoration: none;
   color: hsla(160, 100%, 37%, 1);
   transition: 0.4s;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
-
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
 }
 </style>
