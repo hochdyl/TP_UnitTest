@@ -1,7 +1,7 @@
 <?php
 namespace App\Service;
 
-class EntityUpdater
+class EntityUpdaterService
 {
     /**
      * Update an entity from keys passed to the data array.
