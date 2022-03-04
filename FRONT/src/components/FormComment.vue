@@ -9,7 +9,7 @@
       >
     </div>
     <div>
-      <form @submit.prevent="editmode ? update() : create()">
+      <form @submit.prevent="editmode ? updateComment() : addComment()">
         <div class="modal-body">
           <div class="form-group">
             <label>Commentaire</label>
@@ -22,9 +22,6 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            Annuler
-          </button>
           <button v-show="editmode" type="submit" class="btn btn-success">
             Mettre à jour
           </button>
@@ -68,6 +65,20 @@ export default {
       } else {
         this.form.post_id = this.post_id;
       }
+    },
+    addComment() {
+      this.axios
+        .post("https://127.0.0.1:8000/api/comment/" + this.post_id, this.form)
+        .then((res) => {
+          window.location.href = "/comments/" + this.post_id;
+        });
+    },
+    updateComment() {
+      this.axios
+        .put("https://127.0.0.1:8000/api/comment/" + this.comment_id, this.form)
+        .then((res) => {
+          window.location.href = "/comments/" + this.post_id;
+        });
     },
   },
   created() {
