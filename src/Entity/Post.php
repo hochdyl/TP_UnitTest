@@ -24,6 +24,7 @@ class Post
     private $title;
 
     #[ORM\OneToMany(mappedBy: 'post', targetEntity: Comment::class, orphanRemoval: true)]
+    #[Groups(['public'])]
     private $comments;
 
     public function __construct()
